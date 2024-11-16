@@ -13,7 +13,7 @@
 import scipy.io as sio                     # import scipy.io for .mat file I/
 import numpy as np                         # import numpy
 
-from memory import MemoryDNN
+from memoryTF2 import MemoryDNN
 from optimization import bisection
 from main import plot_rate, save_to_txt
 
@@ -21,7 +21,7 @@ import time
 
 
 def WD_off(channel, N_active, N):
-    # turn off one WD
+    # turn off one WD(wireless devices)
     if N_active > 5: # current we support half of WDs are off
         N_active = N_active - 1
         # set the (N-active-1)th channel to close to 0

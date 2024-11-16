@@ -30,13 +30,14 @@ import scipy.io as sio                     # import scipy.io for .mat file I/
 import numpy as np                         # import numpy
 
 # for tensorflow2
-from memoryTF2 import MemoryDNN
-from optimization import bisection
+from memoryTF2 import MemoryDNN,MemoryRNN,MemoryCNN
+from optimization import bisection,newton_method
 
 import time
 
 
 def plot_rate( rate_his, rolling_intv = 50):
+    # 定义了一个绘制计算速率动态变化的函数
     import matplotlib.pyplot as plt
     import pandas as pd
     import matplotlib as mpl
@@ -45,7 +46,7 @@ def plot_rate( rate_his, rolling_intv = 50):
     df = pd.DataFrame(rate_his)
 
 
-    mpl.style.use('seaborn')
+    mpl.style.use('seaborn-v0_8')
     fig, ax = plt.subplots(figsize=(15,8))
 #    rolling_intv = 20
 
@@ -56,6 +57,7 @@ def plot_rate( rate_his, rolling_intv = 50):
     plt.show()
 
 def save_to_txt(rate_his, file_path):
+    # 用于将计算速率历史数据保存到文件中
     with open(file_path, 'w') as f:
         for rate in rate_his:
             f.write("%s \n" % rate)
@@ -69,7 +71,7 @@ if __name__ == "__main__":
     '''
 
     N = 10                     # number of users
-    n = 30000                     # number of time frames
+    n = 10000                     # number of time frames
     K = N                   # initialize K = N
     decoder_mode = 'OP'    # the quantization mode could be 'OP' (Order-preserving) or 'KNN'
     Memory = 1024          # capacity of memory structure
@@ -87,11 +89,12 @@ if __name__ == "__main__":
     # data are splitted as 80:20
     # training data are randomly sampled with duplication if n > total data size
 
+    # 将数据集划分为 80% 的训练数据和 20% 的测试数据
     split_idx = int(.8* len(channel))
     num_test = min(len(channel) - split_idx, n - int(.8* n)) # training data size
 
 
-    mem = MemoryDNN(net = [N, 120, 80, N],
+    mem = MemoryRNN(net = [N, 120, 80, N],    # origin : net = [N, 120, 80, N]
                     learning_rate = 0.01,
                     training_interval=10,
                     batch_size=128,
@@ -130,7 +133,7 @@ if __name__ == "__main__":
 
         r_list = []
         for m in m_list:
-            r_list.append(bisection(h/1000000, m)[0])
+            r_list.append(newton_method(h/1000000, m)[0])
             
         # encode the mode with largest reward
         mem.encode(h, m_list[np.argmax(r_list)])
